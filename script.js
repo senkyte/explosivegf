@@ -50,6 +50,7 @@ function updateFaceGesture(angerLevel) {
 async function sendValue() {
     const userInput = document.getElementById('userInput');
     const gfText = document.getElementById('gfText');
+    const gfSprite = document.getElementById('gfSprite');
     const message = userInput.value.trim();
     if (!message) {
         alert('Please enter a message!');
@@ -61,6 +62,29 @@ async function sendValue() {
     const originalButtonText = sendButton.textContent;
     sendButton.disabled = true;
     sendButton.textContent = 'Sending...';
+
+    // ----------------
+    // Show loading sprite
+    // ----------------
+    if (gfSprite) {
+        // Hide all regular images
+        for (let i = 1; i <= 5; i++) {
+            const img = document.getElementById('gfImg' + i);
+            if (img) img.style.display = 'none';
+        }
+
+        // Check if loading image exists
+        let loadingImg = document.getElementById('gfLoading');
+        if (!loadingImg) {
+            loadingImg = document.createElement('img');
+            loadingImg.id = 'gfLoading';
+            loadingImg.src = 'gfLoading.gif';
+            loadingImg.style.width = '300px';
+            loadingImg.style.height = 'auto';
+            gfSprite.appendChild(loadingImg);
+        }
+        loadingImg.style.display = 'block';
+    }
 
     gfText.innerHTML = '<p>Thinking...</p>';
 
@@ -89,12 +113,22 @@ async function sendValue() {
         console.error(err);
         gfText.innerHTML = `<p style="color: red;">Failed to connect to server. Make sure it is running on http://localhost:8888</p>`;
     } finally {
+        // ----------------
+        // Hide loading and show normal sprite
+        // ----------------
+        if (gfSprite) {
+            const loadingImg = document.getElementById('gfLoading');
+            if (loadingImg) loadingImg.style.display = 'none';
+            updateImage(); // Show the correct image based on current scale
+        }
+
         userInput.disabled = false;
         sendButton.disabled = false;
         sendButton.textContent = originalButtonText;
         userInput.focus();
     }
 }
+
 
 // -------------------
 // Initialize DOM elements
