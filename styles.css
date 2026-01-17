@@ -1,4 +1,11 @@
 /* Reset and full-page background */
+html, body {
+    min-width: 400px;   /* or whatever width you want */
+    min-height: 600px;  /* or whatever height you want */
+    margin: 0;
+    padding: 0;
+}
+
 * {
     box-sizing: border-box;
     padding: 0;
@@ -19,11 +26,37 @@ body {
     padding: 20px;
 }
 
+#gameOver{
+    display:flex;
+    flex-direction: column;
+    position:absolute;
+    border-style:solid;
+    width: 75%;
+    height: 50%;
+    background-color: white;
+    z-index:1;
+    text-align: center;
+    margin-top:50%;
+    font-size:50px;
+    padding-top: 80px;
+    align-items: center;
+    display: none;
+}
+
+#retry{
+    width: 200px;
+    margin-top: 20px;
+    border-radius:30px;;
+}
+
+
 /* Center your sprite */
 #gfSprite {
     display: flex;
     justify-content: center; /* horizontally center images inside */
     margin-bottom: 20px;
+    width: 150px;
+    height: auto;
 }
 
 /* Style text area */
@@ -39,25 +72,54 @@ body {
 
 /* Input and button */
 #userInput {
-    width: 300px;
-    padding: 10px;
-    font-size: 16px;
-    margin-bottom: 10px;
-}
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            width: 200px;
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+
+        }
 
 #sendButton {
-    padding: 10px 20px;
-    font-size: 16px;
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 18px;
     cursor: pointer;
+    transition: transform 0.2s;
+    
+        }
+
+
+#rageMeter {
+    position: relative;
+    margin: 10px 0;
+    min-width: 250px;
+    height: 30px; /* set explicit height */
+    border: 2px solid black;
+    border-radius: 20px;
+    overflow: hidden; /* so bar stays inside */
+    background-color: pink; /* container background */
 }
 
 /* Face gesture */
-#faceGesture {
-    margin-top: 10px;
-    font-size: 24px;
-    font-weight: bold;
-    color: yellow;
+#rageBar {
+    position: absolute;
+    top: 0; left: 0;
+    width: 10%;   
+    height: 100%;
+    background-color: red;
+    border-radius: 20px;
+    transition: width 0.3s ease;
 }
+
 
 /* Optional anger level text */
 #angerLvl {
@@ -65,33 +127,47 @@ body {
     color: white;
 }
 
-#chatBox{
-    display:flex;
-    border-style: solid;
+#chatBox {
+    display: flex;
     flex-direction: column;
-    gap: 19px;
+    gap: 10px;
+    width: 250px;       /* keep the small width if desired */
+    height: 270px;      /* fix maximum height */
+    padding: 10px;
+    border-radius: 10px;
+    background-color: lightpink;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid;
+    overflow-y: auto;       /* THIS makes it scroll */
+    scroll-behavior: smooth; /* smooth scroll for new messages */
 }
 
 .card {
-    max-width: 70%;
+    max-width: 50%; /* reduce width from 70% to 50% */
     padding: 10px 15px;
-    border-radius: 15px;
     color: white;
     font-size: 16px;
     word-wrap: break-word;
+    border-radius: 15px;
 }
 
 .card.aiBubble {
-    background-color: #4d96ff;
-    align-self: flex-start; /* align to left */
-    margin-left: 5px;
-    margin-right: 200px;
+    background-color: white;
+    color: black; /* make text readable */
+    align-self: flex-start; /* left */
+    margin-left: 10px; /* less extreme margins */
+    margin-right: auto;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Right message (from user) */
 .card.userBubble {
-    background-color: #6bcf7f;
-    align-self: flex-end; /* align to right */
-    margin-right: 5px;
-    margin-left: 200px;
+    background-color: #ff6b9d;
+    align-self: flex-end; /* right */
+    margin-right: 10px; /* less extreme margins */
+    margin-left: auto;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+#messaging{
+    margin-top:20px;
 }

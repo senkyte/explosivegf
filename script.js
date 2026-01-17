@@ -43,10 +43,19 @@ function updateFaceGesture(angerLevel) {
     else if (angerLevel >= 40) faceGesture.textContent = 'Angry 😠';
     else if (angerLevel >= 20) faceGesture.textContent = 'Upset 😐';
     else faceGesture.textContent = 'Calm 😊';
-
+    
+    const rageBar = document.getElementById('rageBar');
+    rageBar.style.width = angerLevel + "%";
+    
     if (angerLvlDiv) {
         angerLvlDiv.textContent = `Anger Level: ${angerLevel}`;
     }
+    
+    // Update badge
+    chrome.runtime.sendMessage({
+        type: "updateAnger",
+        anger: angerLevel
+    });
 }
 
 // -------------------
@@ -57,6 +66,7 @@ async function sendValue() {
     const gfText = document.getElementById('gfText');
     const gfSprite = document.getElementById('gfSprite');
     const message = userInput.value.trim();
+    
     if (!message) {
         alert('Please enter a message!');
         return;
@@ -65,20 +75,24 @@ async function sendValue() {
     userInput.disabled = true;
     const sendButton = document.getElementById('sendButton');
     const originalButtonText = sendButton.textContent;
+    
+    let newElement = document.createElement("div");
+    newElement.setAttribute("class", "card userBubble");
+    newElement.innerText = message;
+    
+    const chatBox = document.getElementById("chatBox");
+    chatBox.appendChild(newElement);
+    
     sendButton.disabled = true;
-    sendButton.textContent = 'Sending...';
+    sendButton.textContent = '...';
 
-    // ----------------
     // Show loading sprite
-    // ----------------
     if (gfSprite) {
-        // Hide all regular images
         for (let i = 1; i <= 5; i++) {
             const img = document.getElementById('gfImg' + i);
             if (img) img.style.display = 'none';
         }
 
-        // Check if loading image exists
         let loadingImg = document.getElementById('gfLoading');
         if (!loadingImg) {
             loadingImg = document.createElement('img');
@@ -90,8 +104,18 @@ async function sendValue() {
         }
         loadingImg.style.display = 'block';
     }
-
-    gfText.innerHTML = '<p>Thinking...</p>';
+   
+    let newAiElement = document.createElement("div");
+    newAiElement.setAttribute("class", "card aiBubble");
+    newAiElement.innerText = "";
+    chatBox.appendChild(newAiElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    
+    let dots = 0;
+    const loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        newAiElement.innerText = ".".repeat(dots); 
+    }, 500);
 
     try {
         const response = await fetch('http://localhost:8888/api/chat', {
@@ -101,30 +125,27 @@ async function sendValue() {
         });
 
         const data = await response.json();
+        clearInterval(loadingInterval);
 
         if (data.success) {
-            gfText.innerHTML = `<p>${data.response}</p>`;
-
-            // Update scale and face gesture
+            newAiElement.innerText = data.response;
             const invertedScale = 100 - data.anger_level;
             updateScale(invertedScale);
             updateFaceGesture(data.anger_level);
-
             userInput.value = '';
         } else {
             gfText.innerHTML = `<p style="color: red;">Error: ${data.error || 'Unknown error'}</p>`;
         }
     } catch (err) {
         console.error(err);
-        gfText.innerHTML = `<p style="color: red;">Failed to connect to server. Make sure it is running on http://localhost:8888</p>`;
+        clearInterval(loadingInterval);
+        newAiElement.innerText = "Failed to connect to server!";
     } finally {
-        // ----------------
         // Hide loading and show normal sprite
-        // ----------------
         if (gfSprite) {
             const loadingImg = document.getElementById('gfLoading');
             if (loadingImg) loadingImg.style.display = 'none';
-            updateImage(); // Show the correct image based on current scale
+            updateImage();
         }
 
         userInput.disabled = false;
@@ -133,7 +154,6 @@ async function sendValue() {
         userInput.focus();
     }
 }
-
 
 // -------------------
 // Initialize DOM elements
@@ -149,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
             img.style.width = '300px';
             img.style.height = 'auto';
 
-            // Placeholder if image fails
             img.onerror = function() {
                 const placeholder = document.createElement('div');
                 placeholder.id = this.id;

@@ -5,29 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explosive Girlfriend test 1</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="gameOver">GAME OVER
+        <button id="retry">Retry</button>
+
+    </div>
     <h1>Explosive Girlfriend</h1>
     
     <div id="gfSprite">
         <!-- Add girlfriend image here-->
     </div>
+    <div id="faceGesture"></div>
+    <div id="rageMeter">
+        <div id="rageBar"></div>
+    </div>
     <div id="chatBox">
-        <div class="card userBubble">user pop!</div>
-        <div class="card aiBubble">bubble pop!</div>
+        <div class="card aiBubble">How could you do this?! </div>
     </div>
-    <div id="gfText">
+    <div id="messaging">
+        <input type="text" id="userInput" placeholder="Enter message">
+        <button type="button" id="sendButton">Send</button>
+    </div>
+        <div id="gfText">
         <!--gf output here-->
-        <p> blah blah blah girlfriend!</p>
+        <p></p>
     </div>
-    <input type="text" id="userInput" placeholder="Enter message">
-    <button type="button" id="sendButton">Send</button>
-    <div id="faceGesture">Neutral</div>
-    <div id="angerLvl"></div>
     <div id="userFaceGesture">No face yet...</div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="script.js"></script>
     <script src="api.js"></script>
+    <script src="bootstrap.bundle.min.js"></script>
 </body>
 </html>
