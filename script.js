@@ -18,44 +18,44 @@ function updateImage() {
 }
 
 // Create the slider and images dynamically
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Create slider label
     const label = document.createElement('label');
     label.setAttribute('for', 'scaleInput');
     label.textContent = 'Scale: ';
-    
+
     // Create slider input
     const slider = document.createElement('input');
     slider.type = 'range';
     slider.id = 'scaleInput';
     slider.min = '0';
     slider.max = '100';
-    slider.value = '50';
-    slider.addEventListener('input', function() {
+    slider.value = '75';
+    slider.addEventListener('input', function () {
         updateScale(this.value);
     });
-    
+
     // Create value span
     const valueSpan = document.createElement('span');
     valueSpan.id = 'scaleValue';
-    valueSpan.textContent = '50';
-    
-    // Append to body after h1
+    valueSpan.textContent = '75';
+
+    // Append to body after h
     const h1 = document.querySelector('h1');
     h1.insertAdjacentElement('afterend', label);
     label.insertAdjacentElement('afterend', slider);
     slider.insertAdjacentElement('afterend', valueSpan);
-    
+
     // Create images
     const gfSprite = document.getElementById('gfSprite');
     for (let i = 1; i <= 5; i++) {
         const img = document.createElement('img');
         img.id = 'gfImg' + i;
-        img.src = 'image' + i + '.jpg';
+        img.src = 'image' + i + '.jpeg';
         img.style.display = 'none';
         gfSprite.appendChild(img);
     }
-    
+
     // Initial update
     updateImage();
 });
