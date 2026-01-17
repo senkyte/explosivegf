@@ -1,57 +1,43 @@
-let scale = 75;
-
-function updateScale(value) {
-    scale = parseInt(value);
-    document.getElementById('scaleValue').textContent = scale;
-    updateImage();
-}
+let scale;
+let config;
 
 function updateImage() {
+    if (!config) return; // Wait for config to load
     // Hide all images
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= config.images.length; i++) {
         document.getElementById('gfImg' + i).style.display = 'none';
     }
-    // Show the appropriate image based on scale
-    let index = Math.floor(scale / 25) + 1;
-    if (index > 5) index = 5;
-    document.getElementById('gfImg' + index).style.display = 'block';
+    // Find and show the appropriate image based on scale
+    for (let i = 0; i < config.images.length; i++) {
+        const imgConfig = config.images[i];
+        if (scale >= imgConfig.range[0] && scale <= imgConfig.range[1]) {
+            document.getElementById('gfImg' + (i + 1)).style.display = 'block';
+            break;
+        }
+    }
 }
 
-// Create the slider and images dynamically
-document.addEventListener('DOMContentLoaded', function () {
-    // Create slider label
-    const label = document.createElement('label');
-    label.setAttribute('for', 'scaleInput');
-    label.textContent = 'Scale: ';
+// Load config and initialize
+document.addEventListener('DOMContentLoaded', async function () {
+    try {
+        const response = await fetch('config.json');
+        config = await response.json();
+        scale = config.anger;
+    } catch (error) {
+        console.error('Failed to load config.json:', error);
+        return;
+    }
 
-    // Create slider input
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.id = 'scaleInput';
-    slider.min = '0';
-    slider.max = '100';
-    slider.value = '75';
-    slider.addEventListener('input', function () {
-        updateScale(this.value);
-    });
-
-    // Create value span
-    const valueSpan = document.createElement('span');
-    valueSpan.id = 'scaleValue';
-    valueSpan.textContent = '75';
-
-    // Append to body after h
-    const h1 = document.querySelector('h1');
-    h1.insertAdjacentElement('afterend', label);
-    label.insertAdjacentElement('afterend', slider);
-    slider.insertAdjacentElement('afterend', valueSpan);
+    // Update face gesture with anger level
+    const faceGesture = document.getElementById('faceGesture');
+    faceGesture.textContent = 'Anger: ' + scale;
 
     // Create images
     const gfSprite = document.getElementById('gfSprite');
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 0; i < config.images.length; i++) {
         const img = document.createElement('img');
-        img.id = 'gfImg' + i;
-        img.src = 'image' + i + '.jpeg';
+        img.id = 'gfImg' + (i + 1);
+        img.src = config.images[i].src;
         img.style.display = 'none';
         gfSprite.appendChild(img);
     }
