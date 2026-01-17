@@ -15,7 +15,7 @@
         <!--gf output here-->
         <p> blah blah blah girlfriend!</p>
     </div>
-    <input type="text" id="userInput" placeholder="Enter message">
+    <input type="text" id="userInput" placeholder="Enter message" onkeypress="if(event.key === 'Enter') sendValue()">
     <button onclick="sendValue()">Send</button>
     <div id="faceGesture">Neutral</div>
     <script src="script.js"></script>
