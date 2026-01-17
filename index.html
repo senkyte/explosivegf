@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Explosive Girlfriend test 1</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Explosive Girlfriend</h1>
@@ -15,12 +16,12 @@
         <!--gf output here-->
         <p> blah blah blah girlfriend!</p>
     </div>
-    <input type="text" id="userInput" placeholder="Enter message" onkeypress="if(event.key === 'Enter') sendValue()">
-    <button onclick="sendValue()">Send</button>
+    <input type="text" id="userInput" placeholder="Enter message">
+    <button type="button" id="sendButton">Send</button>
     <div id="faceGesture">Neutral</div>
+    <div id="angerLvl"></div>
+    <div id="userFaceGesture">Neutral</div>
     <script src="script.js"></script>
     <script src="api.js"></script>
-
-
 </body>
 </html>

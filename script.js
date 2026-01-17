@@ -4,10 +4,13 @@ let configPollInterval;
 
 function updateScale(value) {
     scale = parseInt(value);
+    console.log('updateScale called with:', value, 'scale is now:', scale);
     updateImage();
 }
 
 function updateImage() {
+    console.log('updateImage called, scale:', scale);
+    
     // If config exists, use config-based logic
     if (config && config.images) {
         // Hide all images
@@ -17,18 +20,39 @@ function updateImage() {
                 imgElement.style.display = 'none';
             }
         }
+        
         // Find and show the appropriate image based on scale
+        // Use < for upper bound to avoid overlaps: [0,20), [20,40), [40,60), [60,80), [80,100]
+        let imageIndex = -1;
         for (let i = 0; i < config.images.length; i++) {
             const imgConfig = config.images[i];
-            if (scale >= imgConfig.range[0] && scale <= imgConfig.range[1]) {
-                const imgElement = document.getElementById('gfImg' + (i + 1));
-                if (imgElement) {
-                    imgElement.style.display = 'block';
-                }
+            const inRange = scale >= imgConfig.range[0] && 
+                           (i === config.images.length - 1 ? scale <= imgConfig.range[1] : scale < imgConfig.range[1]);
+            
+            if (inRange) {
+                imageIndex = i + 1;
                 break;
             }
         }
+        
+        // Fallback: if scale > 100, show last image
+        if (imageIndex === -1 && scale > 100) {
+            imageIndex = config.images.length;
+        }
+        
+        console.log('Showing image index:', imageIndex);
+        
+        if (imageIndex > 0) {
+            const imgElement = document.getElementById('gfImg' + imageIndex);
+            if (imgElement) {
+                imgElement.style.display = 'block';
+                console.log('Displayed:', imgElement.id);
+            } else {
+                console.error('Image element not found:', 'gfImg' + imageIndex);
+            }
+        }
     } else {
+        console.log('No config, using fallback');
         // Fallback: simple logic for gfLVL1-5 images
         for (let i = 1; i <= 5; i++) {
             const imgElement = document.getElementById('gfImg' + i);
@@ -49,8 +73,9 @@ function updateImage() {
 
 async function loadConfig() {
     try {
-        const response = await fetch('config.json?t=' + Date.now()); // Add timestamp to prevent caching
+        const response = await fetch('config.json?t=' + Date.now());
         config = await response.json();
+        console.log('Config loaded:', config);
         scale = config.anger;
         
         // Update face gesture with anger level
@@ -68,25 +93,40 @@ async function loadConfig() {
 
 // Load config and initialize
 document.addEventListener('DOMContentLoaded', async function () {
+    console.log('DOM loaded');
+    
     // Load initial config
     await loadConfig();
 
     // Create images
     const gfSprite = document.getElementById('gfSprite');
     if (gfSprite && config) {
+        console.log('Creating images for config:', config);
         for (let i = 0; i < config.images.length; i++) {
             const img = document.createElement('img');
-            img.id = 'gfImg' + (i + 1); // Fix: use i+1 to match the updateImage function
+            img.id = 'gfImg' + (i + 1);
             img.src = 'image' + (i + 1) + '.gif';
             img.style.display = 'none';
+            img.style.width = '200px'; // Add some default styling
+            img.onerror = function() {
+                console.error('Failed to load image:', this.src);
+                // Show placeholder
+                this.alt = 'Image ' + (i + 1) + ' (not found)';
+                this.style.display = 'block';
+                this.style.background = '#ddd';
+                this.style.height = '200px';
+            };
             gfSprite.appendChild(img);
+            console.log('Created image:', img.id, img.src);
         }
+    } else {
+        console.error('gfSprite or config not found', {gfSprite, config});
     }
 
     // Initial update
     updateImage();
     
-    // Set initial anger level display (75 = Slightly Upset)
+    // Set initial anger level display
     updateFaceGesture(75);
 });
 
@@ -96,24 +136,20 @@ async function sendValue() {
     const gfText = document.getElementById('gfText');
     const message = userInput.value.trim();
     
-    // Check if message is empty
     if (!message) {
         alert('Please enter a message!');
         return;
     }
     
-    // Disable input and button while processing
     userInput.disabled = true;
-    const sendButton = document.querySelector('button[onclick="sendValue()"]');
+    const sendButton = document.getElementById('sendButton');
     const originalButtonText = sendButton.textContent;
     sendButton.disabled = true;
     sendButton.textContent = 'Sending...';
     
-    // Show loading state
     gfText.innerHTML = '<p>Thinking...</p>';
     
     try {
-        // Send POST request to Flask API
         const response = await fetch('http://localhost:8888/api/chat', {
             method: 'POST',
             headers: {
@@ -127,31 +163,20 @@ async function sendValue() {
         }
         
         const data = await response.json();
+        console.log('Received from API:', data);
         
         if (data.success) {
-            // Update AI response text
             gfText.innerHTML = `<p>${data.response}</p>`;
-            
-            // Update image based on anger level (0-100 maps to 0-100 scale)
-            // Higher anger = lower scale (more angry = angrier image)
-            // 100 anger = 0 scale (most angry = gfLVL1), 0 anger = 100 scale (calm = gfLVL5)
-            const invertedScale = 100 - data.anger_level;
-            updateScale(invertedScale);
-            
-            // Update face gesture based on anger level
+            updateScale(data.anger_level);
             updateFaceGesture(data.anger_level);
-            
-            // Clear input field
             userInput.value = '';
         } else {
-            // Handle error response
             gfText.innerHTML = `<p style="color: red;">Error: ${data.error || 'Unknown error'}</p>`;
         }
     } catch (error) {
         console.error('Error:', error);
         gfText.innerHTML = `<p style="color: red;">Failed to connect to server. Make sure the Flask server is running on http://localhost:8888</p>`;
     } finally {
-        // Re-enable input and button
         userInput.disabled = false;
         sendButton.disabled = false;
         sendButton.textContent = originalButtonText;
@@ -161,9 +186,16 @@ async function sendValue() {
 
 // Update face gesture based on anger level (higher = more angry)
 function updateFaceGesture(angerLevel) {
+    const angerLvl = document.getElementById('angerLvl');
+    if (angerLvl) {
+        angerLvl.textContent = angerLevel;
+    }
+
     const faceGesture = document.getElementById('faceGesture');
     
-    if (angerLevel >= 80) {
+    if (angerLevel >= 100) {
+        faceGesture.textContent = 'KABOOM 💥';
+    } else if (angerLevel >= 80) {
         faceGesture.textContent = 'Explosive/Cold War 💢';
     } else if (angerLevel >= 60) {
         faceGesture.textContent = 'Very Angry 😡';
@@ -178,10 +210,21 @@ function updateFaceGesture(angerLevel) {
 
 // Allow Enter key to send message
 document.addEventListener('DOMContentLoaded', function() {
+    const sendButton = document.getElementById('sendButton');
+    if (sendButton) {
+        sendButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            sendValue();
+        });
+    }
+    
     const userInput = document.getElementById('userInput');
     if (userInput) {
         userInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
                 sendValue();
             }
         });
