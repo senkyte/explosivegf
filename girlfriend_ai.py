@@ -176,32 +176,7 @@ class ExplosiveGirlfriendAI:
     
     def _update_config_json(self):
         """Create or update config.json file with current anger level and image configuration"""
-        anger_level = self.conversation.get_last_anger_level()
-        
-        # Define image ranges for 5 images (0-100 anger scale)
-        # Image 1: 0-20 (most angry/explosive)
-        # Image 2: 20-40 (very angry)
-        # Image 3: 40-60 (obviously angry)
-        # Image 4: 60-80 (slightly upset)
-        # Image 5: 80-100 (calm/happy)
-        config = {
-            "anger": anger_level,
-            "images": [
-                {"range": [0, 20]},    # image1.gif
-                {"range": [20, 40]},   # image2.gif
-                {"range": [40, 60]},   # image3.gif
-                {"range": [60, 80]},   # image4.gif
-                {"range": [80, 100]}   # image5.gif
-            ]
-        }
-        
-        # Write to config.json
-        try:
-            with open(self.config_file, 'w', encoding='utf-8') as f:
-                json.dump(config, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"Warning: Failed to update config.json: {e}")
-    
+        pass
     def chat(self, user_input: str) -> Dict:
         """
         Process user input and generate reply

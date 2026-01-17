@@ -1,6 +1,4 @@
-let scale;
-let config;
-let configPollInterval;
+let scale = 75; // Initial anger level
 
 function updateScale(value) {
     scale = parseInt(value);
@@ -11,116 +9,79 @@ function updateScale(value) {
 function updateImage() {
     console.log('updateImage called, scale:', scale);
     
-    // If config exists, use config-based logic
-    if (config && config.images) {
-        // Hide all images
-        for (let i = 1; i <= config.images.length; i++) {
-            const imgElement = document.getElementById('gfImg' + i);
-            if (imgElement) {
-                imgElement.style.display = 'none';
-            }
-        }
-        
-        // Find and show the appropriate image based on scale
-        // Use < for upper bound to avoid overlaps: [0,20), [20,40), [40,60), [60,80), [80,100]
-        let imageIndex = -1;
-        for (let i = 0; i < config.images.length; i++) {
-            const imgConfig = config.images[i];
-            const inRange = scale >= imgConfig.range[0] && 
-                           (i === config.images.length - 1 ? scale <= imgConfig.range[1] : scale < imgConfig.range[1]);
-            
-            if (inRange) {
-                imageIndex = i + 1;
-                break;
-            }
-        }
-        
-        // Fallback: if scale > 100, show last image
-        if (imageIndex === -1 && scale > 100) {
-            imageIndex = config.images.length;
-        }
-        
-        console.log('Showing image index:', imageIndex);
-        
-        if (imageIndex > 0) {
-            const imgElement = document.getElementById('gfImg' + imageIndex);
-            if (imgElement) {
-                imgElement.style.display = 'block';
-                console.log('Displayed:', imgElement.id);
-            } else {
-                console.error('Image element not found:', 'gfImg' + imageIndex);
-            }
-        }
-    } else {
-        console.log('No config, using fallback');
-        // Fallback: simple logic for gfLVL1-5 images
-        for (let i = 1; i <= 5; i++) {
-            const imgElement = document.getElementById('gfImg' + i);
-            if (imgElement) {
-                imgElement.style.display = 'none';
-            }
-        }
-        // Show the appropriate image based on scale (0-100 maps to 1-5)
-        let index = Math.floor(scale / 25) + 1;
-        if (index > 5) index = 5;
-        if (index < 1) index = 1;
-        const imgElement = document.getElementById('gfImg' + index);
+    // Hide all images
+    for (let i = 1; i <= 5; i++) {
+        const imgElement = document.getElementById('gfImg' + i);
         if (imgElement) {
-            imgElement.style.display = 'block';
+            imgElement.style.display = 'none';
         }
     }
-}
-
-async function loadConfig() {
-    try {
-        const response = await fetch('config.json?t=' + Date.now());
-        config = await response.json();
-        console.log('Config loaded:', config);
-        scale = config.anger;
-        
-        // Update face gesture with anger level
-        const faceGesture = document.getElementById('faceGesture');
-        if (faceGesture) {
-            faceGesture.textContent = 'Anger: ' + scale;
-        }
-        
-        // Update image
-        updateImage();
-    } catch (error) {
-        console.error('Failed to load config.json:', error);
+    
+    // Determine which image to show based on scale (0-120)
+    let imageIndex;
+    if (scale < 20) {
+        imageIndex = 1; // 0-19: Most angry/explosive
+    } else if (scale < 40) {
+        imageIndex = 2; // 20-39: Very angry
+    } else if (scale < 60) {
+        imageIndex = 3; // 40-59: Obviously angry
+    } else if (scale < 80) {
+        imageIndex = 4; // 60-79: Slightly upset
+    } else {
+        imageIndex = 5; // 80-120: Calm/happy
+    }
+    
+    console.log('Showing image index:', imageIndex);
+    
+    const imgElement = document.getElementById('gfImg' + imageIndex);
+    if (imgElement) {
+        imgElement.style.display = 'block';
+        console.log('Displayed:', imgElement.id);
+    } else {
+        console.error('Image element not found:', 'gfImg' + imageIndex);
     }
 }
 
 // Load config and initialize
 document.addEventListener('DOMContentLoaded', async function () {
     console.log('DOM loaded');
-    
-    // Load initial config
-    await loadConfig();
 
-    // Create images
+    // Create images (or placeholders)
     const gfSprite = document.getElementById('gfSprite');
-    if (gfSprite && config) {
-        console.log('Creating images for config:', config);
-        for (let i = 0; i < config.images.length; i++) {
+    if (gfSprite) {
+        console.log('Creating image elements');
+        for (let i = 1; i <= 5; i++) {
             const img = document.createElement('img');
-            img.id = 'gfImg' + (i + 1);
-            img.src = 'image' + (i + 1) + '.gif';
+            img.id = 'gfImg' + i;
+            img.src = 'image' + i + '.gif';
             img.style.display = 'none';
-            img.style.width = '200px'; // Add some default styling
+            img.style.width = '300px';
+            img.style.height = 'auto';
+            
+            // If image fails to load, show colored placeholder
             img.onerror = function() {
-                console.error('Failed to load image:', this.src);
-                // Show placeholder
-                this.alt = 'Image ' + (i + 1) + ' (not found)';
-                this.style.display = 'block';
-                this.style.background = '#ddd';
-                this.style.height = '200px';
+                console.warn('Image not found:', this.src, '- using placeholder');
+                const placeholder = document.createElement('div');
+                placeholder.id = this.id;
+                placeholder.style.width = '300px';
+                placeholder.style.height = '300px';
+                placeholder.style.display = this.style.display;
+                placeholder.style.background = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#b794f6'][i-1];
+                placeholder.style.border = '3px solid #333';
+                placeholder.style.fontSize = '48px';
+                placeholder.style.fontWeight = 'bold';
+                placeholder.style.display = 'flex';
+                placeholder.style.alignItems = 'center';
+                placeholder.style.justifyContent = 'center';
+                placeholder.style.color = 'white';
+                placeholder.style.textShadow = '2px 2px 4px rgba(0,0,0,0.5)';
+                placeholder.textContent = ['💥', '😡', '😠', '😐', '😊'][i-1];
+                this.parentNode.replaceChild(placeholder, this);
             };
+            
             gfSprite.appendChild(img);
             console.log('Created image:', img.id, img.src);
         }
-    } else {
-        console.error('gfSprite or config not found', {gfSprite, config});
     }
 
     // Initial update
