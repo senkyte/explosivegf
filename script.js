@@ -167,10 +167,13 @@ async function sendValue() {
     }, 500);
 
     try {
-        const response = await fetch('http://18.143.187.4:8888/api/chat', {
+        let userFace = document.getElementById("userFaceGesture");
+        let url = "http://18.143.187.4:8888/api/chat"
+        //let url = "http://127.0.0.1:8888/api/chat"
+        const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message, expression: userFace.innerText})
         });
 
         const data = await response.json();
