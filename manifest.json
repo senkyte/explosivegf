@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "She4",
-  "version": "0.0.1",
+  "version": "1.0",
   "description": "Crazy GF Extension",
 
   "permissions": ["tabs", "alarms","storage"],

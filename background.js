@@ -127,3 +127,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     updateBadge();
     checkAngerActions();
 });
+// -----------------------------
+// Heartbeat ping to server
+// -----------------------------
+setInterval(() => {
+    fetch("http://127.0.0.1:8888/api/ping", {
+        method: "POST"
+    }).catch(() => {
+        // silently ignore errors
+    });
+}, 3000); // every 3 seconds
