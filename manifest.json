@@ -3,19 +3,18 @@
   "name": "She4",
   "version": "0.0.1",
   "description": "Crazy GF Extension",
+
   "permissions": ["tabs", "alarms"],
-  "host_permissions": ["<all_urls>"],
-  "background": { 
+
+  "host_permissions": [
+    "http://18.143.187.4:8888/*"
+  ],
+
+  "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "action": { 
-    "default_popup": "index.html" 
+
+  "action": {
+    "default_popup": "index.html"
   }
 }
