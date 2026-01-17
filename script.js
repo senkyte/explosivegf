@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let i = 1; i <= 5; i++) {
         const img = document.createElement('img');
         img.id = 'gfImg' + i;
-        img.src = 'image' + i + '.jpeg';
+        img.src = 'gfLVL' + i + '.gif';
         img.style.display = 'none';
         gfSprite.appendChild(img);
     }
