@@ -12,7 +12,7 @@ function updateImage() {
         document.getElementById('gfImg' + i).style.display = 'none';
     }
     // Show the appropriate image based on scale
-    let index = Math.floor(scale / 20) + 1;
+    let index = Math.floor(scale / 25) + 1;
     if (index > 5) index = 5;
     document.getElementById('gfImg' + index).style.display = 'block';
 }
