@@ -13,7 +13,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "updateAnger") {
         anger = msg.anger;
         updateBadge();
-        // DON'T call checkAngerActions here!
         sendResponse({ success: true });
     } else if (msg.type === "getAnger") {
         sendResponse({ anger: anger });
@@ -34,6 +33,29 @@ function updateBadge() {
     chrome.action.setBadgeBackgroundColor({ color: color });
 }
 
+// NEW: Send overlay message to all tabs
+function showOverlayOnAllTabs() {
+    console.log("📢 Sending overlay to all tabs at anger:", anger);
+    chrome.tabs.query({}, (tabs) => {
+        tabs.forEach(tab => {
+            // Skip chrome:// and extension pages
+            if (tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+                chrome.tabs.sendMessage(tab.id, {
+                    type: "updateGF",
+                    anger: anger
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        // Tab might not have content script loaded yet
+                        console.log("⚠️ Tab", tab.id, "not ready:", chrome.runtime.lastError.message);
+                    } else {
+                        console.log("✅ Overlay sent to:", tab.title);
+                    }
+                });
+            }
+        });
+    });
+}
+
 function checkAngerActions() {
     if (anger >= 100) {
         // CLOSE THE WINDOW
@@ -52,9 +74,7 @@ function checkAngerActions() {
         // Randomly close a tab (33% chance each check)
         if (Math.random() < 0.33) {
             chrome.tabs.query({ currentWindow: true }, (tabs) => {
-                // Don't close if only one tab left
                 if (tabs.length > 1) {
-                    // Pick a random tab
                     const randomIndex = Math.floor(Math.random() * tabs.length);
                     const tabToClose = tabs[randomIndex];
                     
@@ -63,6 +83,11 @@ function checkAngerActions() {
                 }
             });
         }
+    }
+    
+    // Show overlay at certain anger thresholds
+    if (anger === 50 || anger === 70 || anger === 85 || anger === 95) {
+        showOverlayOnAllTabs();
     }
 }
 
@@ -79,5 +104,5 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
     console.log("🔥 Anger level:", anger);
     updateBadge();
-    checkAngerActions(); // ONLY call it here from the alarm
+    checkAngerActions();
 });

@@ -9,9 +9,20 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
         // Remove existing overlay
         const old = document.getElementById('gfOverlay');
-        if (old) old.remove();
+        if (old) {
+            console.log("🗑️ Removing old overlay");
+            old.remove();
+        }
 
-        // Create overlay
+        // Determine emoji based on anger
+        let emoji;
+        if (angerLevel >= 80) emoji = "💥";
+        else if (angerLevel >= 60) emoji = "😡";
+        else if (angerLevel >= 40) emoji = "😠";
+        else if (angerLevel >= 20) emoji = "😐";
+        else emoji = "😊";
+
+        // Create overlay container
         const overlay = document.createElement("div");
         overlay.id = 'gfOverlay';
         overlay.style.cssText = `
@@ -28,55 +39,76 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             align-items: center !important;
             color: white !important;
             font-family: Arial, sans-serif !important;
-            animation: shake 0.5s infinite !important;
+            pointer-events: none !important;
         `;
 
-        // Add animation
-        if (!document.getElementById('gfStyle')) {
+        // Add shake animation
+        if (!document.getElementById('gfShakeStyle')) {
             const style = document.createElement("style");
-            style.id = 'gfStyle';
+            style.id = 'gfShakeStyle';
             style.textContent = `
-                @keyframes shake {
+                @keyframes gfShake {
                     0%, 100% { transform: translate(0, 0) rotate(0deg); }
-                    10% { transform: translate(-2px, -2px) rotate(-1deg); }
-                    20% { transform: translate(2px, 0px) rotate(1deg); }
-                    30% { transform: translate(0px, 2px) rotate(0deg); }
-                    40% { transform: translate(-2px, 0px) rotate(1deg); }
-                    50% { transform: translate(2px, 2px) rotate(-1deg); }
-                    60% { transform: translate(0px, -2px) rotate(0deg); }
-                    70% { transform: translate(2px, 0px) rotate(-1deg); }
-                    80% { transform: translate(-2px, 2px) rotate(1deg); }
-                    90% { transform: translate(2px, -2px) rotate(0deg); }
+                    10% { transform: translate(-5px, -5px) rotate(-2deg); }
+                    20% { transform: translate(5px, 0px) rotate(2deg); }
+                    30% { transform: translate(0px, 5px) rotate(0deg); }
+                    40% { transform: translate(-5px, 0px) rotate(2deg); }
+                    50% { transform: translate(5px, 5px) rotate(-2deg); }
+                    60% { transform: translate(0px, -5px) rotate(0deg); }
+                    70% { transform: translate(5px, 0px) rotate(-2deg); }
+                    80% { transform: translate(-5px, 5px) rotate(2deg); }
+                    90% { transform: translate(5px, -5px) rotate(0deg); }
+                }
+                #gfOverlay {
+                    animation: gfShake 0.5s infinite !important;
                 }
             `;
             document.head.appendChild(style);
+            console.log("✅ Animation style added");
         }
 
         // Face emoji
         const face = document.createElement("div");
-        face.style.fontSize = "120px";
-        if (angerLevel >= 80) face.textContent = "💥";
-        else if (angerLevel >= 60) face.textContent = "😡";
-        else if (angerLevel >= 40) face.textContent = "😠";
-        else if (angerLevel >= 20) face.textContent = "😐";
-        else face.textContent = "😊";
+        face.style.cssText = `
+            font-size: 120px !important;
+            margin-bottom: 20px !important;
+        `;
+        face.textContent = emoji;
         overlay.appendChild(face);
 
-        // Message
-        const msg = document.createElement("div");
-        msg.textContent = `CRAZY GF ALERT! (${angerLevel})`;
-        msg.style.fontSize = "48px";
-        msg.style.fontWeight = "bold";
-        msg.style.marginTop = "20px";
-        overlay.appendChild(msg);
+        // Message text
+        const msgText = document.createElement("div");
+        msgText.style.cssText = `
+            font-size: 48px !important;
+            font-weight: bold !important;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8) !important;
+        `;
+        msgText.textContent = `CRAZY GF ALERT! (${angerLevel})`;
+        overlay.appendChild(msgText);
 
-        document.body.appendChild(overlay);
-        console.log("✅ Overlay added to page!");
+        // Insert at the very end of body (or create body if it doesn't exist)
+        if (document.body) {
+            document.body.appendChild(overlay);
+            console.log("✅ Overlay appended to body");
+        } else {
+            // If body doesn't exist yet, wait for it
+            const observer = new MutationObserver(() => {
+                if (document.body) {
+                    document.body.appendChild(overlay);
+                    console.log("✅ Overlay appended to body (after waiting)");
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.documentElement, { childList: true });
+            console.log("⏳ Waiting for body to exist...");
+        }
 
         // Remove after 4 seconds
         setTimeout(() => {
-            overlay.remove();
-            console.log("🗑️ Overlay removed");
+            if (overlay.parentNode) {
+                overlay.remove();
+                console.log("🗑️ Overlay removed after timeout");
+            }
         }, 4000);
 
         sendResponse({ success: true });

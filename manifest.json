@@ -7,7 +7,7 @@
   "permissions": ["tabs", "alarms","storage"],
 
   "host_permissions": [
-    "http://18.143.187.4:8888/*"
+    "<all_urls>"
   ],
 
   "background": {
@@ -16,5 +16,12 @@
 
   "action": {
     "default_popup": "index.html"
+  },
+ "content_scripts": [
+  {
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_end"
   }
+]
 }
