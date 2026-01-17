@@ -1,3 +1,24 @@
+let allowNetwork = false;
+
+const realFetch = globalThis.fetch;
+
+globalThis.fetch = (...args) => {
+    if (!allowNetwork) {
+        console.warn("📴 Blocked fetch:", args[0]);
+        return Promise.reject("Network disabled");
+    }
+    return realFetch(...args);
+};
+
+globalThis.WebSocket = function () {
+    throw new Error("WebSocket blocked 💀");
+};
+
+chrome.runtime.onMessage.addListener((msg) => {
+    if (msg.type === "ENABLE_NET") allowNetwork = true;
+    if (msg.type === "DISABLE_NET") allowNetwork = false;
+});
+
 let anger = 75;
 
 // Clear all stored data when extension is installed/reloaded
