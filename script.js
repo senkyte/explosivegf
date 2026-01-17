@@ -35,6 +35,7 @@ function updateImage() {
 // -------------------
 function updateFaceGesture(angerLevel) {
     const faceGesture = document.getElementById('faceGesture');
+    const angerLvlDiv = document.getElementById('angerLvl');
     if (!faceGesture) return;
 
     if (angerLevel >= 80) faceGesture.textContent = 'Explosive 💥';
@@ -42,6 +43,10 @@ function updateFaceGesture(angerLevel) {
     else if (angerLevel >= 40) faceGesture.textContent = 'Angry 😠';
     else if (angerLevel >= 20) faceGesture.textContent = 'Upset 😐';
     else faceGesture.textContent = 'Calm 😊';
+
+    if (angerLvlDiv) {
+        angerLvlDiv.textContent = `Anger Level: ${angerLevel}`;
+    }
 }
 
 // -------------------
