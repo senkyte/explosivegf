@@ -87,7 +87,11 @@ function updateFaceGesture(angerLevel) {
     else if (angerLevel >= 60) faceGesture.textContent = 'Very Angry 😡';
     else if (angerLevel >= 40) faceGesture.textContent = 'Angry 😠';
     else if (angerLevel >= 20) faceGesture.textContent = 'Upset 😐';
-    else faceGesture.textContent = 'Calm 😊';
+    else {
+        faceGesture.textContent = 'Calm 😊';
+        winner = document.getElementById("gameOver");
+        winner.style.display = "block";
+    }
     
     const rageBar = document.getElementById('rageBar');
     rageBar.style.width = angerLevel + "%";
@@ -243,6 +247,32 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Show the sprite based on current scale
     updateImage();
 
+
+
+    // Retry
+    function restart(){
+    chrome.storage.local.clear();
+    scale = 75;
+    updateImage();
+    updateFaceGesture(75);
+    const chatBox = document.getElementById('chatBox');
+    if (chatBox) {
+        chatBox.innerHTML = '<div class="card aiBubble">How could you do this?!</div>';
+    }
+    const winner = document.getElementById("gameOver");
+    if (winner) {
+        winner.style.display = "none";
+    }
+}
+
+// Retry button
+    const retry = document.getElementById("retry");  // ← FIX: changed - to =
+    if(retry){
+        retry.addEventListener('click', function(e) {
+            e.preventDefault();
+            restart();
+    });
+    }
     // Send button
     const sendButton = document.getElementById('sendButton');
     if (sendButton) {

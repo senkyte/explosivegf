@@ -35,7 +35,7 @@ body {
     border-style:solid;
     width: 75%;
     height: 50%;
-    background-color: white;
+    background-color: palevioletred;
     z-index:1;
     text-align: center;
     margin-top:50%;
@@ -43,13 +43,14 @@ body {
     padding-top: 80px;
     align-items: center;
     font-family: "VT323";
-    display:none
+    display: none;
 }
 
 #retry{
     width: 200px;
     margin-top: 20px;
-    border-radius:30px;;
+    border-radius:30px;
+    background-color: lightgreen;
 }
 
 
