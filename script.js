@@ -4,6 +4,51 @@
 let scale = 75; // Initial anger level (0 = angry, 100 = calm)
 
 // -------------------
+// Load saved messages on startup
+// -------------------
+async function loadMessages() {
+    const result = await chrome.storage.local.get(['chatMessages', 'angerLevel']);
+    const chatBox = document.getElementById('chatBox');
+    
+    if (result.chatMessages && result.chatMessages.length > 0) {
+        chatBox.innerHTML = ''; // Clear default message
+        result.chatMessages.forEach(msg => {
+            const msgElement = document.createElement("div");
+            msgElement.setAttribute("class", `card ${msg.type}`);
+            msgElement.innerText = msg.text;
+            chatBox.appendChild(msgElement);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    // Restore anger level (but don't update image yet)
+    if (result.angerLevel !== undefined) {
+        scale = 100 - result.angerLevel;
+        updateFaceGesture(result.angerLevel);
+    }
+}
+
+// -------------------
+// Save messages to storage
+// -------------------
+async function saveMessages() {
+    const chatBox = document.getElementById('chatBox');
+    const messages = [];
+    
+    chatBox.querySelectorAll('.card').forEach(card => {
+        messages.push({
+            type: card.classList.contains('userBubble') ? 'userBubble' : 'aiBubble',
+            text: card.innerText
+        });
+    });
+    
+    await chrome.storage.local.set({ 
+        chatMessages: messages,
+        angerLevel: 100 - scale
+    });
+}
+
+// -------------------
 // Update scale and image
 // -------------------
 function updateScale(value) {
@@ -133,6 +178,9 @@ async function sendValue() {
             updateScale(invertedScale);
             updateFaceGesture(data.anger_level);
             userInput.value = '';
+            
+            // Save messages after each interaction
+            await saveMessages();
         } else {
             gfText.innerHTML = `<p style="color: red;">Error: ${data.error || 'Unknown error'}</p>`;
         }
@@ -158,7 +206,7 @@ async function sendValue() {
 // -------------------
 // Initialize DOM elements
 // -------------------
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const gfSprite = document.getElementById('gfSprite');
     if (gfSprite) {
         for (let i = 1; i <= 5; i++) {
@@ -189,8 +237,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Show initial face gesture
-    updateFaceGesture(scale);
+    // Load saved messages AFTER DOM is ready
+    await loadMessages();
+    
+    // Show the sprite based on current scale
     updateImage();
 
     // Send button

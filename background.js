@@ -1,11 +1,19 @@
 let anger = 75;
 
+// Clear all stored data when extension is installed/reloaded
+chrome.runtime.onInstalled.addListener(() => {
+    console.log("🔄 Extension reloaded - clearing all data");
+    chrome.storage.local.clear();
+    anger = 75;
+    updateBadge();
+});
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "updateAnger") {
         anger = msg.anger;
         updateBadge();
-        checkAngerActions();
+        // DON'T call checkAngerActions here!
         sendResponse({ success: true });
     } else if (msg.type === "getAnger") {
         sendResponse({ anger: anger });
@@ -33,6 +41,13 @@ function checkAngerActions() {
         chrome.windows.getCurrent((window) => {
             chrome.windows.remove(window.id);
         });
+        
+        // Reset anger and clear messages
+        anger = 75;
+        chrome.storage.local.clear();
+        updateBadge();
+        console.log("🔄 Anger reset to 75, messages cleared");
+        
     } else if (anger >= 90) {
         // Randomly close a tab (33% chance each check)
         if (Math.random() < 0.33) {
@@ -64,5 +79,5 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
     console.log("🔥 Anger level:", anger);
     updateBadge();
-    checkAngerActions();
+    checkAngerActions(); // ONLY call it here from the alarm
 });

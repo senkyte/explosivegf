@@ -4,12 +4,14 @@ html, body {
     min-height: 600px;  /* or whatever height you want */
     margin: 0;
     padding: 0;
+    
 }
 
 * {
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    font-family: "VT323";
 }
 
 body {
@@ -40,7 +42,8 @@ body {
     font-size:50px;
     padding-top: 80px;
     align-items: center;
-    display: none;
+    font-family: "VT323";
+    display:none
 }
 
 #retry{
@@ -113,7 +116,7 @@ body {
 #rageBar {
     position: absolute;
     top: 0; left: 0;
-    width: 10%;   
+    width: 75%;   
     height: 100%;
     background-color: red;
     border-radius: 20px;
