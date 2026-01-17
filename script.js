@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     for (let i = 0; i < config.images.length; i++) {
         const img = document.createElement('img');
         img.id = 'gfImg' + i;
-        img.src = 'image' + i + '.jpeg';
+        img.src = 'image' + i + '.gif';
         img.style.display = 'none';
         gfSprite.appendChild(img);
     }

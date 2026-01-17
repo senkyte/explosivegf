@@ -84,6 +84,9 @@ class ExplosiveGirlfriendAI:
         self.client = genai.Client(api_key=api_key)
         self.conversation = ConversationHistory()
         self.base_prompt = self._create_base_prompt()
+        self.config_file = "config.json"
+        # Initialize config.json with default values
+        self._update_config_json()
     
     def _create_base_prompt(self) -> str:
         """Create base personality prompt"""
@@ -165,6 +168,34 @@ class ExplosiveGirlfriendAI:
         # Let the LLM decide - just return current anger as baseline
         return current_anger
     
+    def _update_config_json(self):
+        """Create or update config.json file with current anger level and image configuration"""
+        anger_level = self.conversation.get_last_anger_level()
+        
+        # Define image ranges for 5 images (0-100 anger scale)
+        # Image 1: 0-20 (most angry/explosive)
+        # Image 2: 20-40 (very angry)
+        # Image 3: 40-60 (obviously angry)
+        # Image 4: 60-80 (slightly upset)
+        # Image 5: 80-100 (calm/happy)
+        config = {
+            "anger": anger_level,
+            "images": [
+                {"range": [0, 20]},    # image1.jpeg
+                {"range": [20, 40]},   # image2.jpeg
+                {"range": [40, 60]},   # image3.jpeg
+                {"range": [60, 80]},   # image4.jpeg
+                {"range": [80, 100]}   # image5.jpeg
+            ]
+        }
+        
+        # Write to config.json
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Warning: Failed to update config.json: {e}")
+    
     def chat(self, user_input: str) -> Dict:
         """
         Process user input and generate reply
@@ -226,6 +257,9 @@ Remember: Maintain tsundere personality, even when angry stay cute!"""
             self.conversation.add_message("user", user_input)
             self.conversation.add_message("assistant", ai_response.response, ai_response.anger_level)
             
+            # Update config.json with new anger level
+            self._update_config_json()
+            
             return {
                 "anger_level": ai_response.anger_level,
                 "response": ai_response.response,
@@ -244,6 +278,8 @@ Remember: Maintain tsundere personality, even when angry stay cute!"""
     def reset_conversation(self):
         """Reset conversation history"""
         self.conversation = ConversationHistory()
+        # Update config.json with default anger level
+        self._update_config_json()
     
     def get_emotion_status(self) -> Dict:
         """Get current emotion status"""
