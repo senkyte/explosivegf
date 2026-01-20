@@ -168,7 +168,7 @@ async function sendValue() {
 
     try {
         let userFace = document.getElementById("userFaceGesture");
-        let url = "http://18.143.187.4:8888/api/chat"
+        let url = "http://47.129.234.161:8888/api/chat"
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
